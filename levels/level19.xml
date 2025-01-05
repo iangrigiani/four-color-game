@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<level id="19">
+    <nodes count="30">
+        <!-- Patrón de red compleja con múltiples capas -->
+        <node id="v1" x="50" y="10" />
+        <node id="v2" x="80" y="20" />
+        <node id="v3" x="90" y="45" />
+        <node id="v4" x="85" y="70" />
+        <node id="v5" x="60" y="90" />
+        <node id="v6" x="40" y="90" />
+        <node id="v7" x="15" y="70" />
+        <node id="v8" x="10" y="45" />
+        <node id="v9" x="20" y="20" />
+        <node id="v10" x="50" y="25" />
+        <node id="v11" x="70" y="35" />
+        <node id="v12" x="75" y="55" />
+        <node id="v13" x="65" y="75" />
+        <node id="v14" x="35" y="75" />
+        <node id="v15" x="25" y="55" />
+        <node id="v16" x="30" y="35" />
+        <node id="v17" x="50" y="50" />
+        <node id="v18" x="60" y="45" />
+        <node id="v19" x="65" y="60" />
+        <node id="v20" x="50" y="70" />
+        <node id="v21" x="35" y="60" />
+        <node id="v22" x="40" y="45" />
+        <node id="v23" x="50" y="40" />
+        <node id="v24" x="55" y="35" />
+        <node id="v25" x="60" y="55" />
+        <node id="v26" x="45" y="65" />
+        <node id="v27" x="40" y="55" />
+        <node id="v28" x="45" y="45" />
+        <node id="v29" x="55" y="45" />
+        <node id="v30" x="55" y="55" />
+    </nodes>
+    <connections>
+        <!-- Capa exterior -->
+        <connection from="v1" to="v2" />
+        <connection from="v2" to="v3" />
+        <connection from="v3" to="v4" />
+        <connection from="v4" to="v5" />
+        <connection from="v5" to="v6" />
+        <connection from="v6" to="v7" />
+        <connection from="v7" to="v8" />
+        <connection from="v8" to="v9" />
+        <connection from="v9" to="v1" />
+        <!-- Capa media -->
+        <connection from="v10" to="v11" />
+        <connection from="v11" to="v12" />
+        <connection from="v12" to="v13" />
+        <connection from="v13" to="v14" />
+        <connection from="v14" to="v15" />
+        <connection from="v15" to="v16" />
+        <connection from="v16" to="v10" />
+        <!-- Red central -->
+        <connection from="v17" to="v18" />
+        <connection from="v18" to="v19" />
+        <connection from="v19" to="v20" />
+        <connection from="v20" to="v21" />
+        <connection from="v21" to="v22" />
+        <connection from="v22" to="v17" />
+        <!-- Conexiones internas -->
+        <connection from="v23" to="v24" />
+        <connection from="v24" to="v25" />
+        <connection from="v25" to="v26" />
+        <connection from="v26" to="v27" />
+        <connection from="v27" to="v28" />
+        <connection from="v28" to="v23" />
+        <!-- Conexiones cruzadas -->
+        <connection from="v29" to="v30" />
+        <connection from="v30" to="v17" />
+        <connection from="v17" to="v29" />
+        <connection from="v23" to="v17" />
+        <connection from="v25" to="v17" />
+        <connection from="v27" to="v17" />
+    </connections>
+</level>

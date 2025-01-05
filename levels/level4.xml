@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<level id="4">
+    <nodes count="20">
+        <!-- Patrón de cuadrícula irregular -->
+        <node id="v1" x="20" y="20" />
+        <node id="v2" x="40" y="15" />
+        <node id="v3" x="60" y="20" />
+        <node id="v4" x="80" y="15" />
+        <node id="v5" x="15" y="40" />
+        <node id="v6" x="35" y="35" />
+        <node id="v7" x="65" y="35" />
+        <node id="v8" x="85" y="40" />
+        <node id="v9" x="25" y="55" />
+        <node id="v10" x="45" y="60" />
+        <node id="v11" x="55" y="55" />
+        <node id="v12" x="75" y="60" />
+        <node id="v13" x="20" y="75" />
+        <node id="v14" x="40" y="80" />
+        <node id="v15" x="60" y="75" />
+        <node id="v16" x="80" y="80" />
+        <node id="v17" x="30" y="30" />
+        <node id="v18" x="70" y="30" />
+        <node id="v19" x="30" y="70" />
+        <node id="v20" x="70" y="70" />
+    </nodes>
+    <connections>
+        <!-- Conexiones horizontales -->
+        <connection from="v1" to="v2" />
+        <connection from="v2" to="v3" />
+        <connection from="v3" to="v4" />
+        <connection from="v5" to="v6" />
+        <connection from="v7" to="v8" />
+        <connection from="v9" to="v10" />
+        <connection from="v11" to="v12" />
+        <connection from="v13" to="v14" />
+        <connection from="v15" to="v16" />
+        <!-- Conexiones verticales -->
+        <connection from="v1" to="v5" />
+        <connection from="v2" to="v6" />
+        <connection from="v3" to="v7" />
+        <connection from="v4" to="v8" />
+        <connection from="v5" to="v9" />
+        <connection from="v7" to="v11" />
+        <connection from="v8" to="v12" />
+        <connection from="v9" to="v13" />
+        <connection from="v11" to="v15" />
+        <connection from="v12" to="v16" />
+        <!-- Conexiones diagonales -->
+        <connection from="v17" to="v6" />
+        <connection from="v17" to="v9" />
+        <connection from="v18" to="v7" />
+        <connection from="v18" to="v12" />
+        <connection from="v19" to="v13" />
+        <connection from="v19" to="v10" />
+        <connection from="v20" to="v15" />
+        <connection from="v20" to="v11" />
+    </connections>
+</level>
