@@ -1,30 +1,25 @@
 class LevelLoader {
     constructor() {
         this.levels = {};
-        this.maxLevels = 20;
+        this.maxLevels = 100;
     }
 
     async loadLevel(levelNumber) {
         try {
-            // Si el nivel ya está generado, devolverlo
             if (this.levels[levelNumber]) {
                 return this.levels[levelNumber];
             }
 
-            // Generar nuevo nivel
             const levelXML = LevelGenerator.generateLevel(levelNumber);
             const parser = new DOMParser();
             const xmlDoc = parser.parseFromString(levelXML, "text/xml");
             
-            // Convertir el XML a objeto de nivel
             const levelData = {
                 nodes: [],
                 connections: []
             };
 
-            // Procesar nodos
-            const nodes = xmlDoc.getElementsByTagName('node');
-            Array.from(nodes).forEach(node => {
+            Array.from(xmlDoc.getElementsByTagName('node')).forEach(node => {
                 levelData.nodes.push({
                     id: node.getAttribute('id'),
                     x: parseInt(node.getAttribute('x')),
@@ -32,16 +27,13 @@ class LevelLoader {
                 });
             });
 
-            // Procesar conexiones
-            const connections = xmlDoc.getElementsByTagName('connection');
-            Array.from(connections).forEach(conn => {
+            Array.from(xmlDoc.getElementsByTagName('connection')).forEach(conn => {
                 levelData.connections.push({
                     from: conn.getAttribute('from'),
                     to: conn.getAttribute('to')
                 });
             });
 
-            // Guardar el nivel generado
             this.levels[levelNumber] = levelData;
             return levelData;
         } catch (error) {

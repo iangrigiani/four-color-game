@@ -1,4 +1,25 @@
 class LevelGenerator {
+    // Configuración general
+    static CONFIG = {
+        // Dimensiones del área de juego
+        CANVAS_SIZE: 1200,
+        MARGIN: 100,
+        
+        // Configuración de nodos
+        MIN_NODES: 6,
+        MAX_NODES: 40,
+        MIN_NODE_DISTANCE: 100,
+        NODE_POSITION_MAX_ATTEMPTS: 150,
+        
+        // Configuración de conexiones
+        BASE_MIN_EDGES: 2,
+        BASE_MAX_EDGES: 3,
+        MAX_MIN_EDGES: 4,
+        MAX_MAX_EDGES: 7,
+        EDGES_MIN_LEVEL_STEP: 25,  // Cada cuántos niveles aumenta minEdges
+        EDGES_MAX_LEVEL_STEP: 20   // Cada cuántos niveles aumenta maxEdges
+    };
+
     static generateLevel(levelNumber) {
         const config = this.getLevelConfig(levelNumber);
         const nodes = this.generateNodes(config);
@@ -7,11 +28,14 @@ class LevelGenerator {
     }
 
     static getLevelConfig(levelNumber) {
-        // Configuración progresiva según el nivel
+        const { CONFIG } = this;
         return {
-            nodeCount: Math.min(5 + Math.floor(levelNumber * 1.5), 20), // Incrementa nodos gradualmente
-            minEdgesPerNode: Math.min(2 + Math.floor(levelNumber / 3), 5), // Incrementa conexiones mínimas
-            maxEdgesPerNode: Math.min(3 + Math.floor(levelNumber / 2), 7), // Incrementa conexiones máximas
+            nodeCount: Math.round(CONFIG.MIN_NODES + 
+                ((CONFIG.MAX_NODES - CONFIG.MIN_NODES) * (levelNumber - 1) / 99)),
+            minEdgesPerNode: Math.min(CONFIG.BASE_MIN_EDGES + 
+                Math.floor(levelNumber / CONFIG.EDGES_MIN_LEVEL_STEP), CONFIG.MAX_MIN_EDGES),
+            maxEdgesPerNode: Math.min(CONFIG.BASE_MAX_EDGES + 
+                Math.floor(levelNumber / CONFIG.EDGES_MAX_LEVEL_STEP), CONFIG.MAX_MAX_EDGES),
             pattern: this.getPatternForLevel(levelNumber)
         };
     }
@@ -33,12 +57,11 @@ class LevelGenerator {
     static generateNodes(config) {
         const nodes = [];
         const { nodeCount, pattern } = config;
-        // Usar más espacio del SVG
-        const margin = 80; // Margen desde los bordes
-        const width = 1000 - (2 * margin);  // Ancho útil
-        const height = 1000 - (2 * margin); // Alto útil
-        const centerX = 500;
-        const centerY = 500;
+        const { CANVAS_SIZE, MARGIN } = this.CONFIG;
+        const width = CANVAS_SIZE - (2 * MARGIN);
+        const height = CANVAS_SIZE - (2 * MARGIN);
+        const centerX = CANVAS_SIZE / 2;
+        const centerY = CANVAS_SIZE / 2;
 
         switch (pattern) {
             case 'simple-random':
@@ -46,19 +69,19 @@ class LevelGenerator {
                 for (let i = 0; i < nodeCount; i++) {
                     nodes.push({
                         id: `n${i + 1}`,
-                        x: Math.round(margin + Math.random() * width),
-                        y: Math.round(margin + Math.random() * height)
+                        x: Math.round(MARGIN + Math.random() * (CANVAS_SIZE - 2 * MARGIN)),
+                        y: Math.round(MARGIN + Math.random() * (CANVAS_SIZE - 2 * MARGIN))
                     });
                 }
                 break;
 
             case 'simple-circular':
                 // Distribución circular usando más espacio
-                const radius = Math.min(width, height) * 0.4; // 40% del espacio disponible
+                const radius = Math.min(CANVAS_SIZE - 2 * MARGIN) * 0.4; // 40% del espacio disponible
                 for (let i = 0; i < nodeCount; i++) {
-                    const baseAngle = (i * Math.PI * 1.5) / nodeCount;
+                    const baseAngle = (i * Math.PI * 2) / nodeCount;
                     const angleVar = (Math.random() - 0.5) * Math.PI / 6;
-                    const r = radius + (Math.random() - 0.5) * radius * 0.5;
+                    const r = radius + (Math.random() - 0.5) * radius * 0.3;
                     nodes.push({
                         id: `n${i + 1}`,
                         x: Math.round(centerX + r * Math.cos(baseAngle + angleVar)),
@@ -75,24 +98,27 @@ class LevelGenerator {
                 // Generar centros de clusters bien distribuidos
                 for (let i = 0; i < clusterCount; i++) {
                     clusterCenters.push({
-                        x: margin + (width * (i + 1)) / (clusterCount + 1),
-                        y: margin + Math.random() * height
+                        x: MARGIN + ((CANVAS_SIZE - 2 * MARGIN) * (i + 1)) / (clusterCount + 1),
+                        y: MARGIN + Math.random() * (CANVAS_SIZE - 2 * MARGIN)
                     });
                 }
 
                 for (let i = 0; i < nodeCount; i++) {
                     if (i < clusterCount * 2) {
                         const cluster = clusterCenters[i % clusterCount];
+                        const offset = 120; // Reducido para evitar salirse del tablero
                         nodes.push({
                             id: `n${i + 1}`,
-                            x: Math.round(cluster.x + (Math.random() - 0.5) * 150),
-                            y: Math.round(cluster.y + (Math.random() - 0.5) * 150)
+                            x: Math.round(Math.max(MARGIN, Math.min(CANVAS_SIZE - MARGIN, 
+                                cluster.x + (Math.random() - 0.5) * offset))),
+                            y: Math.round(Math.max(MARGIN, Math.min(CANVAS_SIZE - MARGIN, 
+                                cluster.y + (Math.random() - 0.5) * offset)))
                         });
                     } else {
                         nodes.push({
                             id: `n${i + 1}`,
-                            x: Math.round(margin + Math.random() * width),
-                            y: Math.round(margin + Math.random() * height)
+                            x: Math.round(MARGIN + Math.random() * (CANVAS_SIZE - 2 * MARGIN)),
+                            y: Math.round(MARGIN + Math.random() * (CANVAS_SIZE - 2 * MARGIN))
                         });
                     }
                 }
@@ -101,15 +127,17 @@ class LevelGenerator {
             case 'asymmetric':
                 // Distribución asimétrica usando todo el espacio
                 const quadrants = [[1,1], [1,-1], [-1,1], [-1,-1]];
-                const maxRadius = Math.min(width, height) * 0.45;
+                const maxRadius = Math.min(CANVAS_SIZE - 2 * MARGIN) * 0.4;
                 for (let i = 0; i < nodeCount; i++) {
                     const quad = quadrants[i % quadrants.length];
                     const r = Math.random() * maxRadius + maxRadius * 0.2;
                     const angle = Math.random() * Math.PI / 2;
                     nodes.push({
                         id: `n${i + 1}`,
-                        x: Math.round(centerX + quad[0] * r * Math.cos(angle)),
-                        y: Math.round(centerY + quad[1] * r * Math.sin(angle))
+                        x: Math.round(Math.max(MARGIN, Math.min(CANVAS_SIZE - MARGIN,
+                            centerX + quad[0] * r * Math.cos(angle)))),
+                        y: Math.round(Math.max(MARGIN, Math.min(CANVAS_SIZE - MARGIN,
+                            centerY + quad[1] * r * Math.sin(angle))))
                     });
                 }
                 break;
@@ -120,20 +148,20 @@ class LevelGenerator {
                     let x, y;
                     if (i % 3 === 0) {
                         const angle = (i * 137.5 * Math.PI) / 180;
-                        const r = Math.sqrt(i) * (width * 0.15);
+                        const r = Math.sqrt(i) * ((CANVAS_SIZE - 2 * MARGIN) * 0.15);
                         x = centerX + r * Math.cos(angle);
                         y = centerY + r * Math.sin(angle);
                     } else if (i % 3 === 1) {
-                        x = margin + (i * width / nodeCount);
-                        y = margin + (i * height / nodeCount);
+                        x = MARGIN + (i * (CANVAS_SIZE - 2 * MARGIN) / nodeCount);
+                        y = MARGIN + (i * (CANVAS_SIZE - 2 * MARGIN) / nodeCount);
                     } else {
-                        x = margin + Math.random() * width;
-                        y = margin + Math.random() * height;
+                        x = MARGIN + Math.random() * (CANVAS_SIZE - 2 * MARGIN);
+                        y = MARGIN + Math.random() * (CANVAS_SIZE - 2 * MARGIN);
                     }
                     nodes.push({
                         id: `n${i + 1}`,
-                        x: Math.round(x),
-                        y: Math.round(y)
+                        x: Math.round(Math.max(MARGIN, Math.min(CANVAS_SIZE - MARGIN, x))),
+                        y: Math.round(Math.max(MARGIN, Math.min(CANVAS_SIZE - MARGIN, y)))
                     });
                 }
                 break;
@@ -141,16 +169,16 @@ class LevelGenerator {
             default:
                 // Distribución aleatoria mejorada para otros casos
                 const sectors = Math.ceil(Math.sqrt(nodeCount));
-                const sectorWidth = width / sectors;
-                const sectorHeight = height / sectors;
+                const sectorWidth = (CANVAS_SIZE - 2 * MARGIN) / sectors;
+                const sectorHeight = (CANVAS_SIZE - 2 * MARGIN) / sectors;
 
                 for (let i = 0; i < nodeCount; i++) {
                     const sectorX = i % sectors;
                     const sectorY = Math.floor(i / sectors);
                     nodes.push({
                         id: `n${i + 1}`,
-                        x: Math.round(margin + sectorX * sectorWidth + Math.random() * sectorWidth),
-                        y: Math.round(margin + sectorY * sectorHeight + Math.random() * sectorHeight)
+                        x: Math.round(MARGIN + sectorX * sectorWidth + Math.random() * sectorWidth),
+                        y: Math.round(MARGIN + sectorY * sectorHeight + Math.random() * sectorHeight)
                     });
                 }
                 break;
@@ -160,13 +188,11 @@ class LevelGenerator {
     }
 
     static adjustNodePositions(nodes) {
-        const minDistance = 80; // Aumentar distancia mínima entre nodos
-        const maxAttempts = 100; // Más intentos para mejor distribución
-        const margin = 80;
-        const maxX = 1000 - margin;
-        const maxY = 1000 - margin;
+        const { MIN_NODE_DISTANCE, NODE_POSITION_MAX_ATTEMPTS, MARGIN, CANVAS_SIZE } = this.CONFIG;
+        const maxX = CANVAS_SIZE - MARGIN;
+        const maxY = CANVAS_SIZE - MARGIN;
         
-        for (let attempt = 0; attempt < maxAttempts; attempt++) {
+        for (let attempt = 0; attempt < NODE_POSITION_MAX_ATTEMPTS; attempt++) {
             let overlapping = false;
             
             for (let i = 0; i < nodes.length; i++) {
@@ -175,15 +201,15 @@ class LevelGenerator {
                     const dy = nodes[j].y - nodes[i].y;
                     const distance = Math.sqrt(dx * dx + dy * dy);
                     
-                    if (distance < minDistance) {
+                    if (distance < MIN_NODE_DISTANCE) {
                         overlapping = true;
                         const angle = Math.atan2(dy, dx);
-                        const adjustment = (minDistance - distance) / 2;
+                        const adjustment = (MIN_NODE_DISTANCE - distance) / 2;
                         
-                        nodes[i].x = Math.round(Math.max(margin, Math.min(maxX, nodes[i].x - Math.cos(angle) * adjustment)));
-                        nodes[i].y = Math.round(Math.max(margin, Math.min(maxY, nodes[i].y - Math.sin(angle) * adjustment)));
-                        nodes[j].x = Math.round(Math.max(margin, Math.min(maxX, nodes[j].x + Math.cos(angle) * adjustment)));
-                        nodes[j].y = Math.round(Math.max(margin, Math.min(maxY, nodes[j].y + Math.sin(angle) * adjustment)));
+                        nodes[i].x = Math.round(Math.max(MARGIN, Math.min(maxX, nodes[i].x - Math.cos(angle) * adjustment)));
+                        nodes[i].y = Math.round(Math.max(MARGIN, Math.min(maxY, nodes[i].y - Math.sin(angle) * adjustment)));
+                        nodes[j].x = Math.round(Math.max(MARGIN, Math.min(maxX, nodes[j].x + Math.cos(angle) * adjustment)));
+                        nodes[j].y = Math.round(Math.max(MARGIN, Math.min(maxY, nodes[j].y + Math.sin(angle) * adjustment)));
                     }
                 }
             }
@@ -308,18 +334,17 @@ class LevelGenerator {
     static previewLevel(levelNumber) {
         const config = this.getLevelConfig(levelNumber);
         const xml = this.generateLevel(levelNumber);
+        const { CANVAS_SIZE } = this.CONFIG;
         
-        // Crear un elemento temporal para mostrar la vista previa
         const previewDiv = document.createElement('div');
         previewDiv.innerHTML = `
             <div style="border: 1px solid #ccc; margin: 20px; padding: 15px; border-radius: 5px;">
                 <h3>Nivel ${levelNumber}</h3>
                 <div style="margin-bottom: 10px; font-size: 14px; color: #666;">
                     Nodos: ${config.nodeCount} | 
-                    Conexiones por nodo: ${config.minEdgesPerNode}-${config.maxEdgesPerNode} |
-                    Nodos simples garantizados: ${config.guaranteedSimpleNodes || 0}
+                    Conexiones por nodo: ${config.minEdgesPerNode}-${config.maxEdgesPerNode}
                 </div>
-                <svg width="1000" height="1000" style="border: 1px solid #ddd; border-radius: 5px; background: #f9f9f9;">
+                <svg width="${CANVAS_SIZE}" height="${CANVAS_SIZE}" style="border: 1px solid #ddd; border-radius: 5px; background: #f9f9f9;">
                     <!-- Se llenará con los nodos y conexiones -->
                 </svg>
             </div>
@@ -398,4 +423,4 @@ class LevelGenerator {
 }
 
 // Generar vista previa de varios niveles para ver la variedad
-//LevelGenerator.generatePreviewsForLevels(1, 20); 
+//LevelGenerator.generatePreviewsForLevels(1, 100); 

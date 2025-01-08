@@ -74,7 +74,6 @@ class Game {
     }
 
     async loadLevel(levelNumber) {
-        console.log('Cargando nivel:', levelNumber);
         try {
             // Limpiar estado anterior
             this.nodeColors = {};
@@ -100,8 +99,9 @@ class Game {
         const padding = 50;
         const maxX = Math.max(...this.levelData.nodes.map(n => n.x));
         const maxY = Math.max(...this.levelData.nodes.map(n => n.y));
-        const scaleX = (800 - 2 * padding) / maxX;
-        const scaleY = (600 - 2 * padding) / maxY;
+        const canvasSize = LevelGenerator.CONFIG.CANVAS_SIZE;
+        const scaleX = (canvasSize - 2 * padding) / maxX;
+        const scaleY = (canvasSize - 2 * padding) / maxY;
         const scale = Math.min(scaleX, scaleY);
 
         // Dibujar conexiones primero
@@ -123,7 +123,7 @@ class Game {
             const circle = document.createElementNS("http://www.w3.org/2000/svg", "circle");
             circle.setAttribute('cx', node.x * scale + padding);
             circle.setAttribute('cy', node.y * scale + padding);
-            circle.setAttribute('r', '20');
+            circle.setAttribute('r', '45');
             circle.setAttribute('data-id', node.id);
             circle.setAttribute('class', 'node uncolored');
             
