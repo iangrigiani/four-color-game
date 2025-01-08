@@ -221,22 +221,56 @@ class Game {
     }
 
     colorNode(nodeId, color) {
-        const node = this.svg.querySelector(`circle[data-id="${nodeId}"]`);
-        if (!node) return;
-
-        // Limpiar selección antes de colorear
-        this.clearSelection();
-
-        // Aplicar el nuevo color
-        node.classList.remove('uncolored');
-        node.setAttribute('fill', color);
+        // Actualizar el color del nodo
         this.nodeColors[nodeId] = color;
-
-        // Agregar clase para efectos visuales
+        const node = this.svg.querySelector(`[data-id="${nodeId}"]`);
+        node.setAttribute('fill', color);
         node.classList.add('colored');
+        node.classList.remove('uncolored');
 
-        // Verificar si el color es válido
-        this.checkNodeColors();
+        // Limpiar todos los estados de conflicto
+        this.svg.querySelectorAll('.node.conflict').forEach(n => {
+            n.classList.remove('conflict');
+        });
+
+        // Verificar conflictos solo para el nodo actual y sus adyacentes
+        const adjacentNodes = this.getAdjacentNodes(nodeId);
+        let hasConflicts = false;
+
+        // Verificar conflictos con nodos adyacentes
+        adjacentNodes.forEach(adjNodeId => {
+            if (this.nodeColors[adjNodeId] === color) {
+                // Marcar ambos nodos como en conflicto
+                this.svg.querySelector(`[data-id="${nodeId}"]`).classList.add('conflict');
+                this.svg.querySelector(`[data-id="${adjNodeId}"]`).classList.add('conflict');
+                hasConflicts = true;
+                console.log('Conflict detected between nodes:', nodeId, 'and', adjNodeId);
+            }
+        });
+
+        // Verificar si el nivel está completo
+        const allNodesColored = this.levelData.nodes.every(node => 
+            this.nodeColors[node.id] !== undefined
+        );
+
+        if (allNodesColored && !this.hasAnyConflicts()) {
+            this.levelComplete();
+        }
+    }
+
+    // Nuevo método para verificar si hay algún conflicto en el tablero
+    hasAnyConflicts() {
+        for (let nodeId in this.nodeColors) {
+            const currentColor = this.nodeColors[nodeId];
+            const adjacentNodes = this.getAdjacentNodes(nodeId);
+            
+            for (let adjNodeId of adjacentNodes) {
+                if (this.nodeColors[adjNodeId] === currentColor) {
+                    return true;
+                }
+            }
+        }
+        return false;
     }
 
     checkSolution() {
@@ -436,6 +470,37 @@ class Game {
             if (node) {
                 node.classList.remove('dragover');
             }
+        });
+    }
+
+    getAdjacentNodes(nodeId) {
+        const adjacentNodes = new Set();
+        
+        this.levelData.connections.forEach(conn => {
+            if (conn.from === nodeId) {
+                adjacentNodes.add(conn.to);
+            } else if (conn.to === nodeId) {
+                adjacentNodes.add(conn.from);
+            }
+        });
+        
+        return Array.from(adjacentNodes);
+    }
+
+    levelComplete() {
+        // Mostrar mensaje de éxito
+        const messageDiv = document.getElementById('message');
+        messageDiv.textContent = '¡Felicitaciones! Has completado el nivel correctamente.';
+        messageDiv.className = 'success';
+        messageDiv.style.display = 'block';
+        
+        // Marcar el nivel como completado
+        this.isLevelComplete = true;
+        
+        // Añadir efecto visual a todos los nodos
+        this.levelData.nodes.forEach(node => {
+            const nodeElement = this.svg.querySelector(`[data-id="${node.id}"]`);
+            nodeElement.classList.add('correct');
         });
     }
 }
