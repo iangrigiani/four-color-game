@@ -7,6 +7,7 @@ class Game {
         this.selectedNode = null;
         this.levelLoader = levelLoader;
         this.isLevelComplete = false;
+        this.draggedColor = null;
     }
 
     init() {
@@ -39,6 +40,8 @@ class Game {
                     console.error('Error durante la inicialización:', error);
                     reject(error);
                 });
+
+            this.initDragAndDrop();
         });
     }
 
@@ -135,6 +138,17 @@ class Game {
             
             circle.addEventListener('click', () => this.handleNodeClick(node.id, circle));
             this.svg.appendChild(circle);
+
+            // Añadir eventos para el efecto visual durante el drag
+            circle.addEventListener('dragenter', () => {
+                if (this.draggedColor) {
+                    circle.classList.add('dragover');
+                }
+            });
+
+            circle.addEventListener('dragleave', () => {
+                circle.classList.remove('dragover');
+            });
         });
     }
 
@@ -353,6 +367,76 @@ class Game {
                 messageDiv.style.display = 'none';
             }, 3000);
         }
+    }
+
+    initDragAndDrop() {
+        // Configurar los botones de color para ser arrastrables
+        const colorButtons = document.querySelectorAll('.colorButton');
+        colorButtons.forEach(button => {
+            button.setAttribute('draggable', 'true');
+            
+            button.addEventListener('dragstart', (e) => {
+                this.draggedColor = button.dataset.color;
+                e.dataTransfer.setData('text/plain', ''); // Necesario para Firefox
+                button.classList.add('selected');
+            });
+
+            button.addEventListener('dragend', () => {
+                this.draggedColor = null;
+                button.classList.remove('selected');
+            });
+        });
+
+        // Configurar el SVG para aceptar elementos arrastrados
+        this.svg.addEventListener('dragover', (e) => {
+            e.preventDefault(); // Necesario para permitir el drop
+        });
+
+        // Manejar el evento drop en el SVG
+        this.svg.addEventListener('drop', (e) => {
+            e.preventDefault();
+            if (!this.draggedColor) return;
+
+            // Encontrar el nodo más cercano al punto de drop
+            const pt = this.svg.createSVGPoint();
+            pt.x = e.clientX;
+            pt.y = e.clientY;
+            const svgP = pt.matrixTransform(this.svg.getScreenCTM().inverse());
+
+            // Buscar el nodo más cercano dentro de un radio razonable
+            const nodes = Array.from(this.svg.getElementsByClassName('node'));
+            const closestNode = nodes.reduce((closest, node) => {
+                const cx = parseFloat(node.getAttribute('cx'));
+                const cy = parseFloat(node.getAttribute('cy'));
+                const distance = Math.hypot(cx - svgP.x, cy - svgP.y);
+                
+                if (distance < 40 && (!closest || distance < closest.distance)) {
+                    return { node, distance };
+                }
+                return closest;
+            }, null);
+
+            if (closestNode) {
+                const nodeId = closestNode.node.getAttribute('data-id');
+                this.colorNode(nodeId, this.draggedColor);
+                closestNode.node.classList.remove('dragover');
+            }
+        });
+
+        // Añadir efectos visuales cuando se arrastra sobre los nodos
+        this.svg.addEventListener('dragenter', (e) => {
+            const node = e.target.closest('.node');
+            if (node && this.draggedColor) {
+                node.classList.add('dragover');
+            }
+        });
+
+        this.svg.addEventListener('dragleave', (e) => {
+            const node = e.target.closest('.node');
+            if (node) {
+                node.classList.remove('dragover');
+            }
+        });
     }
 }
 
