@@ -8,6 +8,11 @@ class Game {
         this.levelLoader = levelLoader;
         this.isLevelComplete = false;
         this.draggedColor = null;
+        this.timerStarted = false;
+        this.startTime = null;
+        this.timerInterval = null;
+        this.timerElement = document.getElementById('timer');
+        this.timeDisplay = document.getElementById('time');
     }
 
     init() {
@@ -83,6 +88,13 @@ class Game {
             this.selectedNode = null;
             this.isLevelComplete = false;
             
+            // Reiniciar el timer
+            this.stopTimer();
+            this.timerStarted = false;
+            this.startTime = null;
+            this.timerElement.style.display = 'none';
+            this.timeDisplay.textContent = '0.00';
+            
             // Ocultar mensaje anterior
             const messageDiv = document.getElementById('message');
             messageDiv.style.display = 'none';
@@ -93,7 +105,7 @@ class Game {
                 this.drawGraph();
             });
         } catch (error) {
-            console.error('Error cargando nivel:', error);
+            throw error;
         }
     }
 
@@ -221,6 +233,9 @@ class Game {
     }
 
     colorNode(nodeId, color) {
+        // Iniciar el timer al colorear el primer nodo
+        this.startTimer();
+
         // Actualizar el color del nodo
         this.nodeColors[nodeId] = color;
         const node = this.svg.querySelector(`[data-id="${nodeId}"]`);
@@ -488,11 +503,17 @@ class Game {
     }
 
     levelComplete() {
-        // Mostrar mensaje de éxito
+        const finalTime = this.stopTimer();
+        
+        // Mostrar mensaje de éxito con el tiempo formateado
         const messageDiv = document.getElementById('message');
-        messageDiv.textContent = '¡Felicitaciones! Has completado el nivel correctamente.';
+        const timeStr = this.formatTime(finalTime);
+        messageDiv.textContent = `¡Felicitaciones! Has completado el nivel en ${timeStr}`;
         messageDiv.className = 'success';
         messageDiv.style.display = 'block';
+        
+        // Ocultar el timer
+        this.timerElement.style.display = 'none';
         
         // Marcar el nivel como completado
         this.isLevelComplete = true;
@@ -502,6 +523,43 @@ class Game {
             const nodeElement = this.svg.querySelector(`[data-id="${node.id}"]`);
             nodeElement.classList.add('correct');
         });
+    }
+
+    formatTime(milliseconds) {
+        const hours = Math.floor(milliseconds / 3600000);
+        const minutes = Math.floor((milliseconds % 3600000) / 60000);
+        const seconds = Math.floor((milliseconds % 60000) / 1000);
+        const ms = Math.floor((milliseconds % 1000) / 10); // Centésimas de segundo
+
+        if (hours > 0) {
+            return `${hours}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}.${ms.toString().padStart(2, '0')}`;
+        }
+        if (minutes > 0) {
+            return `${minutes}:${seconds.toString().padStart(2, '0')}.${ms.toString().padStart(2, '0')}`;
+        }
+        return `${seconds}.${ms.toString().padStart(2, '0')}`;
+    }
+
+    startTimer() {
+        if (!this.timerStarted) {
+            this.timerStarted = true;
+            this.startTime = Date.now();
+            this.timerElement.style.display = 'block';
+            
+            this.timerInterval = setInterval(() => {
+                const currentTime = Date.now();
+                const elapsedTime = currentTime - this.startTime;
+                this.timeDisplay.textContent = this.formatTime(elapsedTime);
+            }, 10); // Actualizar cada 10ms para mostrar centésimas
+        }
+    }
+
+    stopTimer() {
+        if (this.timerInterval) {
+            clearInterval(this.timerInterval);
+            this.timerInterval = null;
+        }
+        return this.startTime ? Date.now() - this.startTime : 0;
     }
 }
 

@@ -193,4 +193,19 @@ h1 {
         gap: 10px;
         padding: 10px;
     }
+}
+
+#timer {
+    text-align: center;
+    font-size: 1.2em;
+    margin: 15px 0;
+    padding: 10px;
+    background-color: white;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+#time {
+    font-weight: bold;
+    color: #2c3e50;
 } 
