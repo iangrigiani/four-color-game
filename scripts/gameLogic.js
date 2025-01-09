@@ -119,6 +119,17 @@ class Game {
         const scaleY = (canvasSize - 2 * padding) / maxY;
         const scale = Math.min(scaleX, scaleY);
 
+        // Calcular el tamaño de los nodos según la cantidad
+        const nodeCount = this.levelData.nodes.length;
+        const baseRadius = 45; // Radio base para pocos nodos
+        const minRadius = 20;  // Radio mínimo para muchos nodos
+        const nodeRadius = Math.max(
+            minRadius,
+            Math.round(baseRadius * (1 - (nodeCount - LevelGenerator.CONFIG.MIN_NODES) / 
+            (LevelGenerator.CONFIG.MAX_NODES - LevelGenerator.CONFIG.MIN_NODES)))
+        );
+        console.log(nodeRadius);
+    
         // Dibujar conexiones primero
         this.levelData.connections.forEach(conn => {
             const fromNode = this.levelData.nodes.find(n => n.id === conn.from);
@@ -138,7 +149,7 @@ class Game {
             const circle = document.createElementNS("http://www.w3.org/2000/svg", "circle");
             circle.setAttribute('cx', node.x * scale + padding);
             circle.setAttribute('cy', node.y * scale + padding);
-            circle.setAttribute('r', '45');
+            circle.setAttribute('r', nodeRadius);
             circle.setAttribute('data-id', node.id);
             circle.setAttribute('class', 'node uncolored');
             

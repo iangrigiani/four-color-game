@@ -2,7 +2,7 @@ class LevelGenerator {
     // Configuración general
     static CONFIG = {
         // Dimensiones del área de juego
-        CANVAS_SIZE: 1200,
+        CANVAS_SIZE: 800,
         MARGIN: 100,
         
         // Configuración de nodos
@@ -58,8 +58,6 @@ class LevelGenerator {
         const nodes = [];
         const { nodeCount, pattern } = config;
         const { CANVAS_SIZE, MARGIN } = this.CONFIG;
-        const width = CANVAS_SIZE - (2 * MARGIN);
-        const height = CANVAS_SIZE - (2 * MARGIN);
         const centerX = CANVAS_SIZE / 2;
         const centerY = CANVAS_SIZE / 2;
 
