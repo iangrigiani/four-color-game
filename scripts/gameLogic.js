@@ -128,8 +128,7 @@ class Game {
             Math.round(baseRadius * (1 - (nodeCount - LevelGenerator.CONFIG.MIN_NODES) / 
             (LevelGenerator.CONFIG.MAX_NODES - LevelGenerator.CONFIG.MIN_NODES)))
         );
-        console.log(nodeRadius);
-    
+            
         // Dibujar conexiones primero
         this.levelData.connections.forEach(conn => {
             const fromNode = this.levelData.nodes.find(n => n.id === conn.from);

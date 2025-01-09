@@ -189,7 +189,10 @@ class LevelGenerator {
         const { MIN_NODE_DISTANCE, NODE_POSITION_MAX_ATTEMPTS, MARGIN, CANVAS_SIZE } = this.CONFIG;
         const maxX = CANVAS_SIZE - MARGIN;
         const maxY = CANVAS_SIZE - MARGIN;
+        const centerX = CANVAS_SIZE / 2;
+        const centerY = CANVAS_SIZE / 2;
         
+        // Ajustar posiciones para evitar solapamientos
         for (let attempt = 0; attempt < NODE_POSITION_MAX_ATTEMPTS; attempt++) {
             let overlapping = false;
             
@@ -214,7 +217,7 @@ class LevelGenerator {
             
             if (!overlapping) break;
         }
-        
+
         return nodes;
     }
 
